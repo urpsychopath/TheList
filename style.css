@@ -1,0 +1,230 @@
+* {
+    padding: 0;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+}
+
+body nav {
+    background-color: rgb(255, 255, 255);
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.navbar1 ul {
+    display: flex;
+    font-family: 'Montserrat', sans-serif;
+    padding-left: 10%;
+    padding-right: 10%;
+    justify-content: flex-end;
+   
+}
+
+.navbar1 li {
+    height: 70px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    
+}
+.navbar1 li:first-child {
+    margin-right: auto;
+    font-size: 30px;
+    font-weight: 600;
+}
+.circle { 
+    height: 10px; 
+    width: 10px; 
+    border: solid 2.3px;  
+    border-radius: 50%;  
+    display: inline-block;
+    border-color: #090979;}
+
+.navbar1 a {
+    padding: 0 10px;
+    text-decoration: none;
+    color: black;
+}
+
+.formulaire{
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    max-width: 550px;
+    height: 460px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50px;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    position: relative;
+    border-radius: 15px;
+   
+    
+}
+.icons{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.bxs-circle{
+    margin-left: 20px; 
+    font-size: 35px;
+    color: #6f1d1b;
+}
+.fa-times{
+    margin-right: 20px; 
+   
+    color: #b4b4b4;
+}
+.input{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    justify-content: space-between;
+    margin-left: 40px;
+    margin-right: 40px;
+    padding-top: 10px;
+}
+
+.input input{
+    font-size: 15px;
+    padding-left: 10px;
+}
+
+.premier{
+    width: 375px;
+    height: 40px;
+    border-radius: 5px;
+    border: solid 1px #b4b4b4;
+    color: black;
+}
+
+.deux{
+    height: 40px;
+    width: 60px;
+    background-color: #6f1d1b;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 15px;
+    font-family: 'Montserrat', sans-serif;
+}
+.taches{
+    margin-top: 40px;
+    margin-left: 40px;   
+}
+
+form h1 {
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+.avant-nous{
+    height: 220px;
+    overflow-y: auto
+}
+.nous{
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.fa-trash-alt{
+    font-size: 10px;
+    color: #6f1d1b;
+    margin-bottom: 5px;
+    margin-right: 40px;
+}
+
+/* Style de base pour le modal */
+.modal {
+    display: none; /* Le modal est caché par défaut */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Pour activer le défilement si le contenu est trop grand */
+    background-color: rgba(0, 0, 0, 0.4); /* Fond sombre avec transparence */
+}
+.inputs{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    justify-content: space-between;
+    
+}
+.inputs input{
+    font-size: 15px;
+    padding-left: 10px;
+}
+
+.premiers{
+    width: 375px;
+    height: 40px;
+    border-radius: 5px;
+    border: solid 1px #b4b4b4;
+    color: black;
+    margin-left: 10px;
+}
+/* Contenu du modal */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 25%; /* Largeur du modal */
+    border-radius: 10px; /* Bords arrondis */
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5); /* Ombre */
+}
+
+.modal-content h2{
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 7px;
+}
+
+/* Bouton de fermeture */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Styles supplémentaires pour l'apparence */
+.colors {
+    margin-top: 40px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.color-circle {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+input[type="radio"]:checked + .color-circle {
+    box-shadow: 
+        0 0 0 3px rgba(114, 114, 114, 0.552); /* Ombre grise bien ronde et plus grande derrière */
+}

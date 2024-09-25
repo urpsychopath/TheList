@@ -21,69 +21,113 @@
                 </ul>
             </div>  
         </nav>
+        
         <?php
 // Inclure le fichier de connexion
 include 'connexion.php';
 
-// Vérifier si une tâche est soumise via le formulaire
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Traitement du formulaire d'ajout de tâche
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_task'])) {
     // Récupérer la description de la tâche soumise
-    $description = $_POST['tache'];
+    if (!empty($_POST['tache'])) {
+        $description = $_POST['tache'];
+        $idliste = 1;  // Supposons que la liste a l'ID 1 (à modifier dynamiquement plus tard)
 
-    // ID de la liste 'laliste' (tu peux le changer plus tard quand tu auras des listes dynamiques)
-    $idliste = 1;  // Supposons que 'laliste' ait l'ID 1 dans la table 'liste'
+        // Préparer la requête pour insérer la tâche dans la table 'tache'
+        $sql = "INSERT INTO tache (description, idliste) VALUES (?, ?)";
+        $stmt = $conn->prepare($sql);
 
-    // Préparer la requête pour insérer la tâche dans la table 'tache'
-    $sql = "INSERT INTO tache (description, idliste) VALUES (?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $description, $idliste);  // Liaison des paramètres (description et ID de la liste)
+        if ($stmt === false) {
+            echo "Erreur lors de la préparation de la requête : " . $conn->error;
+            exit();
+        }
 
-    // Exécuter la requête
-    if ($stmt->execute()) {
-        echo "Tâche ajoutée avec succès!";
+        $stmt->bind_param("si", $description, $idliste);  // Liaison des paramètres
+
+        // Exécuter la requête
+        if ($stmt->execute()) {
+            echo "Tâche ajoutée avec succès!";
+        } else {
+            echo "Erreur lors de l'ajout de la tâche : " . $stmt->error;
+        }
+
+        $stmt->close();
     } else {
-        echo "Erreur : " . $stmt->error;
+        echo "Le champ 'tache' est requis.";
     }
 }
+
+// Traitement du formulaire d'ajout de liste
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_list'])) {
+    if (!empty($_POST['listName']) && !empty($_POST['color'])) {
+        $liste = $_POST['listName'];
+        $id_colo = $_POST['color'];
+
+        // Préparer la requête pour insérer la liste dans la table 'liste'
+        $sql = "INSERT INTO liste (nom, idcolo) VALUES (?, ?)";
+        $stmt = $conn->prepare($sql);
+
+        if ($stmt === false) {
+            echo "Erreur lors de la préparation de la requête : " . $conn->error;
+            exit();
+        }
+
+        $stmt->bind_param("si", $liste, $id_colo);  // Liaison des paramètres
+
+        // Exécuter la requête
+        if ($stmt->execute()) {
+            echo "Liste ajoutée avec succès!";
+        } else {
+            echo "Erreur lors de l'ajout de la liste : " . $stmt->error;
+        }
+
+        $stmt->close();
+    } else {
+        echo "Tous les champs sont requis pour créer une liste.";
+    }
+}
+
+// Fermer la connexion
+$conn->close();
 ?>
+
         <!-- Modal pour ajouter une nouvelle liste -->
         <div id="addListModal" class="modal" style="display: none;">
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <h2>Ajouter une liste</h2>
                 <form id="addListForm" method="POST" action="index.php">
-                    <div class="inputs">
-                    <input type="text" name="listName" placeholder="Nom de la liste" class="premiers"required>
-                    <button class="deux"> Add </button>
-                    </div>
-                  
-                    
-                    <!-- Sélection des couleurs -->
-                    <div class="colors">
-                        <label>
-                            <input type="radio" name="color" value="1" checked>
-                            <span class="color-circle" style="background-color: #6f1d1b;"></span>
-                        </label>
-                        <label>
-                            <input type="radio" name="color" value="2">
-                            <span class="color-circle" style="background-color: #bb9457;"></span>
-                        </label>
-                        <label>
-                            <input type="radio" name="color" value="3">
-                            <span class="color-circle" style="background-color: #432818;"></span>
-                        </label>
-                        <label>
-                            <input type="radio" name="color" value="4">
-                            <span class="color-circle" style="background-color: #99582a;"></span>
-                        </label>
-                        <label>
-                            <input type="radio" name="color" value="4">
-                            <span class="color-circle" style="background-color: #ffe6a7"></span>
-                        </label>
-                    </div>
-                    
-                   
-                </form>
+    <div class="inputs">
+        <input type="text" name="listName" placeholder="Nom de la liste" class="premiers" required>
+        <input type="hidden" name="add_list" value="1"> <!-- Champ caché pour identifier le formulaire -->
+        <button class="deux">Add</button>
+    </div>
+    
+    <!-- Sélection des couleurs -->
+    <div class="colors">
+        <label>
+            <input type="radio" name="color" value="1" checked>
+            <span class="color-circle" style="background-color: #6f1d1b;"></span>
+        </label>
+        <label>
+            <input type="radio" name="color" value="2">
+            <span class="color-circle" style="background-color: #bb9457;"></span>
+        </label>
+        <label>
+            <input type="radio" name="color" value="3">
+            <span class="color-circle" style="background-color: #432818;"></span>
+        </label>
+        <label>
+            <input type="radio" name="color" value="4">
+            <span class="color-circle" style="background-color: #99582a;"></span>
+        </label>
+        <label>
+            <input type="radio" name="color" value="5">
+            <span class="color-circle" style="background-color: #ffe6a7;"></span>
+        </label>
+    </div>
+</form>
+
             </div>
         </div>
 
@@ -93,17 +137,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <a href="#"><i class="fas fa-times"> </i>  </a>
             </div>
             <form action="index.php" method="POST">
-                <div class="input">
-                    <input type="text" id="tache" name="tache" class="premier" placeholder="Entrez une tâche pour la journée">
-                    <button class="deux"> Add </button>
-                </div>
-                <div class="taches">
-                    <h1>Listes des tâches</h1>
-                    <div class="avant-nous">
-                        <!-- Listes des tâches -->
-                    </div>
-                </div>
-            </form>
+    <div class="input">
+        <input type="text" id="tache" name="tache" class="premier" placeholder="Entrez une tâche pour la journée" required>
+        <input type="hidden" name="add_task" value="1"> <!-- Champ caché pour identifier le formulaire -->
+        <button class="deux">Add</button>
+    </div>
+</form>
+
         </section>
 
         <!-- JavaScript directement dans ton HTML -->

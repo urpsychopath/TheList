@@ -17,7 +17,7 @@
             <div class="navbar1">
                 <ul>  
                     <li class="top"><a href="#">TheList.</a></li>
-                    <li > <span class="circle"></span> <a href="#">Mes Listes</a></li>
+                    <li > <span class="circle"></span> <a class="open-manage-modal-nav" href="#">Mes Listes</a></li>
                 </ul>
             </div>  
         </nav>
@@ -90,86 +90,106 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_list'])) {
 // Fermer la connexion
 $conn->close();
 ?>
+ <!-- Modal pour ajouter une nouvelle liste -->
+ <div id="addListModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ajouter une liste</h2>
+            <form id="addListForm" method="POST" action="index.php">
+                <div class="inputs">
+                    <input type="text" name="listName" placeholder="Nom de la liste" class="premiers" required>
+                    <input type="hidden" name="add_list" value="1">
+                    <button class="deux">Add</button>
+                </div>
 
-        <!-- Modal pour ajouter une nouvelle liste -->
-        <div id="addListModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Ajouter une liste</h2>
-                <form id="addListForm" method="POST" action="index.php">
-    <div class="inputs">
-        <input type="text" name="listName" placeholder="Nom de la liste" class="premiers" required>
-        <input type="hidden" name="add_list" value="1"> <!-- Champ caché pour identifier le formulaire -->
-        <button class="deux">Add</button>
-    </div>
-    
-    <!-- Sélection des couleurs -->
-    <div class="colors">
-        <label>
-            <input type="radio" name="color" value="1" checked>
-            <span class="color-circle" style="background-color: #6f1d1b;"></span>
-        </label>
-        <label>
-            <input type="radio" name="color" value="2">
-            <span class="color-circle" style="background-color: #bb9457;"></span>
-        </label>
-        <label>
-            <input type="radio" name="color" value="3">
-            <span class="color-circle" style="background-color: #432818;"></span>
-        </label>
-        <label>
-            <input type="radio" name="color" value="4">
-            <span class="color-circle" style="background-color: #99582a;"></span>
-        </label>
-        <label>
-            <input type="radio" name="color" value="5">
-            <span class="color-circle" style="background-color: #ffe6a7;"></span>
-        </label>
-    </div>
-</form>
-
-            </div>
+                <!-- Sélection des couleurs -->
+                <div class="colors">
+                    <label>
+                        <input type="radio" name="color" value="1" checked>
+                        <span class="color-circle" style="background-color: #6f1d1b;"></span>
+                    </label>
+                    <label>
+                        <input type="radio" name="color" value="2">
+                        <span class="color-circle" style="background-color: #bb9457;"></span>
+                    </label>
+                    <label>
+                        <input type="radio" name="color" value="3">
+                        <span class="color-circle" style="background-color: #432818;"></span>
+                    </label>
+                    <label>
+                        <input type="radio" name="color" value="4">
+                        <span class="color-circle" style="background-color: #99582a;"></span>
+                    </label>
+                    <label>
+                        <input type="radio" name="color" value="5">
+                        <span class="color-circle" style="background-color: #ffe6a7;"></span>
+                    </label>
+                </div>
+            </form>
         </div>
-
-        <section class="formulaire">
-            <div class="icons">
-                <a class="open-list-modal" href="#"> <i class='bx bxs-circle'></i></a>
-                <a href="#"><i class="fas fa-times"> </i>  </a>
-            </div>
-            <form action="index.php" method="POST">
-    <div class="input">
-        <input type="text" id="tache" name="tache" class="premier" placeholder="Entrez une tâche pour la journée" required>
-        <input type="hidden" name="add_task" value="1"> <!-- Champ caché pour identifier le formulaire -->
-        <button class="deux">Add</button>
     </div>
-</form>
 
-        </section>
+    <!-- Modal pour gérer les listes -->
+    <div id="manageListModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Gérer les listes</h2>
+            <!-- Contenu pour gérer les listes -->
+            <form id="manageListForm" method="POST" action="manage.php">
+                <div class="inputs">
+                    <input type="text" name="newListName" placeholder="Renommer la liste" class="premiers" required>
+                    <input type="hidden" name="manage_list" value="1">
+                    <button class="deux">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        <!-- JavaScript directement dans ton HTML -->
-        <script>
-            // Obtenir les éléments nécessaires
-            var modal = document.getElementById("addListModal");
-            var openModalBtn = document.querySelector(".open-list-modal");
-            var closeModalBtn = document.querySelector(".close");
+    <section class="formulaire">
+        <div class="icons">
+            <a class="open-list-modal" href="#"><i class='bx bxs-circle'></i></a>
+            <a class="open-manage-modal" href="#"><i class="fas fa-cog"></i></a>
+        </div>
+        <form action="index.php" method="POST">
+            <div class="input">
+                <input type="text" id="tache" name="tache" class="premier" placeholder="Entrez une tâche pour la journée" required>
+                <input type="hidden" name="add_task" value="1">
+                <button class="deux">Add</button>
+            </div>
+        </form>
+    </section>
 
-            // Ouvrir le modal quand on clique sur l'icône noire
+    <!-- JavaScript pour gérer les modals -->
+    <script>
+        function setupModal(modalId, openButtonClass, closeButtonClass) {
+            var modal = document.getElementById(modalId);
+            var openModalBtn = document.querySelector(openButtonClass);
+            var closeModalBtn = modal.querySelector(closeButtonClass);
+
+            // Ouvrir le modal
             openModalBtn.addEventListener("click", function(event) {
-                event.preventDefault();  // Empêcher le comportement par défaut du lien
+                event.preventDefault();
                 modal.style.display = "block";
             });
 
-            // Fermer le modal quand on clique sur la croix
+            // Fermer le modal
             closeModalBtn.addEventListener("click", function() {
                 modal.style.display = "none";
             });
 
-            // Fermer le modal quand on clique en dehors de la boîte de contenu
+            // Fermer le modal en cliquant en dehors du contenu
             window.addEventListener("click", function(event) {
                 if (event.target == modal) {
                     modal.style.display = "none";
                 }
             });
-        </script>
-    </body>
+        }
+
+        // Configuration des deux modals
+        setupModal("addListModal", ".open-list-modal", ".close");
+        setupModal("manageListModal", ".open-manage-modal", ".close");
+        setupModal("manageListModal", ".open-manage-modal-nav", ".close");
+    </script>
+
+</body>
 </html>

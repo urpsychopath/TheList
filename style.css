@@ -74,8 +74,9 @@ body nav {
     font-size: 35px;
     color: #6f1d1b;
 }
-.fa-times{
+.fa-cog{
     margin-right: 20px; 
+    margin-top: 5px;
    
     color: #b4b4b4;
 }

@@ -1,26 +1,25 @@
 <?php
-// delete_task.php
-include 'connexion.php'; // Inclure le fichier de connexion
+// Fichier delete_task.php
+include 'connexion.php';
 
-if (isset($_GET['id'])) {
-    $idtache = $_GET['id'];
-
-    // Préparer la requête pour supprimer la tâche
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_task'])) {
+    $taskId = $_POST['idtache'];
+    
     $sql = "DELETE FROM tache WHERE idtache = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $idtache);
     
-    if ($stmt->execute()) {
-        // Rediriger vers la page d'accueil ou la liste des tâches après la suppression
-        header("Location: index.php");
-        exit();
+    if ($stmt) {
+        $stmt->bind_param("i", $taskId);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Tâche supprimée avec succès']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erreur lors de la suppression de la tâche']);
+        }
+        $stmt->close();
     } else {
-        echo "Erreur lors de la suppression de la tâche : " . $stmt->error;
+        echo json_encode(['success' => false, 'message' => 'Erreur de préparation de la requête']);
     }
-
-    $stmt->close();
+    
+    exit;
 }
-
-// Fermer la connexion
-$conn->close();
 ?>

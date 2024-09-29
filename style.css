@@ -269,3 +269,22 @@ input[type="radio"]:checked + .color-circle {
 .modal-contents .list-container {
     margin-bottom: 20px; /* Espace entre la liste et le bouton "New List" */
 }
+.completed {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #f00;
+}
+
+.completed {
+    text-decoration: line-through;
+    color: #6f1c1b82; 
+  }
+
+  
+  

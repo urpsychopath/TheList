@@ -30,34 +30,30 @@
         // Inclure le fichier de connexion
         include 'connexion.php';
 
-        // Traitement du formulaire d'ajout de tâche
-        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_task'])) {
-            if (!empty($_POST['tache'])) {
-                $description = $_POST['tache'];
-                $idliste = 1;  // Exemple: l'ID de la liste (peut être modifié dynamiquement)
 
-                // Préparer la requête pour insérer la tâche
-                $sql = "INSERT INTO tache (description, idliste) VALUES (?, ?)";
-                $stmt = $conn->prepare($sql);
-
-                if ($stmt === false) {
-                    echo "Erreur lors de la préparation de la requête : " . $conn->error;
-                    exit();
-                }
-
+       // Traitement du formulaire d'ajout de tâche
+       if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_task'])) {
+        if (!empty($_POST['tache']) && !empty($_POST['idliste'])) {
+            $description = $_POST['tache'];
+            $idliste = 31;
+    
+            $sql = "INSERT INTO tache (description, idliste) VALUES (?, ?)";
+            $stmt = $conn->prepare($sql);
+    
+            if ($stmt) {
                 $stmt->bind_param("si", $description, $idliste);
-
                 if ($stmt->execute()) {
-                    echo "Tâche ajoutée avec succès!";
+                    // Redirection pour éviter la résoumission du formulaire
+                    header("Location: " . $_SERVER['PHP_SELF']);
+                    exit();
                 } else {
                     echo "Erreur lors de l'ajout de la tâche : " . $stmt->error;
                 }
-
                 $stmt->close();
-            } else {
-                echo "Le champ 'tache' est requis.";
             }
         }
+    }
+
 
         // Traitement du formulaire d'ajout de liste
         if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_list'])) {
@@ -157,7 +153,32 @@
                 $lists[] = $row;
             }
         }
+
+        // Récupérer les tâches associées à une liste spécifique (par exemple, liste avec id = 29)
+        $sql_tasks = "SELECT idtache, description, faite FROM tache WHERE idliste = ?";
+$stmt_tasks = $conn->prepare($sql_tasks);
+
+if ($stmt_tasks === false) {
+    die("Erreur de préparation de la requête : " . $conn->error);
+}
+
+$idliste = 31; // ID de la liste 'Travail' par exemple
+$stmt_tasks->bind_param("i", $idliste);
+$stmt_tasks->execute();
+$result_tasks = $stmt_tasks->get_result();
+
+$taches = [];
+if ($result_tasks->num_rows > 0) {
+    while ($row = $result_tasks->fetch_assoc()) {
+        $taches[] = $row;
+    }
+}
+
+$stmt_tasks->close();
         
+
+
+
         // Fermer la connexion
         $conn->close();
 
@@ -244,14 +265,37 @@
                 <a class="open-list-modal" href="#"><i class='bx bxs-circle'></i></a>
                 <a class="open-manage-modal" href="#"><i class="fas fa-cog"></i></a>
             </div>
-           <form action="index.php" method="POST">
-          <div class="input">
+            <form id="addTaskForm" action="index.php" method="POST">
+    <div class="input">
         <input type="text" id="tache" name="tache" class="premier" placeholder="Entrez une tâche pour la journée" required>
-        <input type="hidden" name="idliste" id="idliste" value=""> <!-- Champ caché pour l'ID de la liste sélectionnée -->
+        <input type="hidden" name="idliste" id="idliste" value="31">
         <input type="hidden" name="add_task" value="1">
-        <button class="deux">Add</button>
-          </div>
+        <button type="submit" class="deux">Add</button>
+    </div>
 </form>
+
+<div class="taches">
+    <h1>Liste des tâches</h1>
+    <div class="avant-nous">
+    <?php foreach ($taches as $tache): ?>
+    <div id="task-<?php echo $tache['idtache']; ?>" class="nous">
+        <div>
+            <input type="checkbox" data-task-id="<?php echo $tache['idtache']; ?>" id="coche-<?php echo $tache['idtache']; ?>" 
+                   <?php echo $tache['faite'] ? 'checked' : ''; ?> 
+                   onchange="updateTaskStatus(this)">
+            <label for="coche-<?php echo $tache['idtache']; ?>" class="<?php echo $tache['faite'] ? 'completed' : ''; ?>">
+                <?php echo htmlspecialchars($tache['description']); ?>
+            </label>
+        </div>
+        <button onclick="deleteTask(<?php echo $tache['idtache']; ?>)" class="delete-btn">
+            <i class="far fa-trash-alt"></i>
+        </button>
+    </div>
+    <?php endforeach; ?>
+    </div>
+</div>
+
+
 
         </section>
 
@@ -281,6 +325,68 @@
             setupModal('addListModal', '.new-list-btn', '.close');
             setupModal('addListModal', '.open-list-modal', '.close');
             setupModal('manageListModal', '.open-manage-modal', '.close');
+
+
+
+            function deleteTask(taskId) {
+    if (confirm("Voulez-vous vraiment supprimer cette tâche ?")) {
+        fetch('delete_task.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'delete_task=1&idtache=' + taskId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Supprimer l'élément de l'interface utilisateur
+                document.getElementById('task-' + taskId).remove();
+            } else {
+                alert("Erreur lors de la suppression : " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Erreur lors de la suppression :", error);
+        });
+    }
+}
+
+function updateTaskStatus(checkbox) {
+    const taskId = checkbox.dataset.taskId;
+    const label = document.querySelector(`label[for="coche-${taskId}"]`);
+
+    // Ajoute ou retire la classe 'completed' selon l'état de la case à cocher
+    if (checkbox.checked) {
+        label.classList.add('completed');
+        localStorage.setItem(taskId, 'true'); // Enregistre l'état comme 'true'
+    } else {
+        label.classList.remove('completed');
+        localStorage.setItem(taskId, 'false'); // Enregistre l'état comme 'false'
+    }
+}
+window.onload = function() {
+    const tasks = document.querySelectorAll('.nous');
+
+    tasks.forEach(task => {
+        const taskId = task.id.split('-')[1]; // Récupère l'ID de la tâche
+        const checkbox = task.querySelector('input[type="checkbox"]');
+        const label = task.querySelector('label');
+
+        // Vérifie l'état dans le stockage local
+        const isChecked = localStorage.getItem(taskId) === 'true';
+
+        if (isChecked) {
+            checkbox.checked = true;
+            label.classList.add('completed');
+        }
+    });
+};
+
+
+
+
+
         </script>
     </body>
 </html>

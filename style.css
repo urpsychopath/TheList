@@ -229,3 +229,43 @@ input[type="radio"]:checked + .color-circle {
     box-shadow: 
         0 0 0 3px rgba(114, 114, 114, 0.552); /* Ombre grise bien ronde et plus grande derrière */
 }
+
+.exa{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+.new-list-btn{
+    height: 45px;
+    width: 25%;
+    background-color: #6f1d1b;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 17px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    
+}
+.modal-contents {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 20%; /* Largeur du modal */
+    max-height: 60vh; /* Limite la hauteur à 60% de la fenêtre */
+    overflow-y: auto; /* Ajoute une barre de défilement si le contenu dépasse */
+    border-radius: 10px; /* Bords arrondis */
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5); /* Ombre */
+}
+
+.modal-contents h2 {
+    margin-top: 40px;
+    margin-bottom: 30px;
+    margin-left: 25px;
+}
+
+.modal-contents .list-container {
+    margin-bottom: 20px; /* Espace entre la liste et le bouton "New List" */
+}

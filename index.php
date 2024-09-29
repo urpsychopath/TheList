@@ -23,6 +23,10 @@
         </nav>
 
         <?php
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+        
         // Inclure le fichier de connexion
         include 'connexion.php';
 
@@ -94,11 +98,98 @@
                 $used_colors[] = $row['idcolo'];
             }
         }
-        if (empty($used_colors)) {
-            echo "Aucune couleur disponible."; }
+
+        // Préparer la récupération des listes
+        $sql_liste = "SELECT liste.nom, colo.nom AS color_name, colo.id AS color_id FROM liste JOIN colo ON liste.idcolo = colo.id";
+        $result_liste = $conn->query($sql_liste);
+        
+        $lists = [];
+        if ($result_liste->num_rows > 0) {
+            while ($row = $result_liste->fetch_assoc()) {
+                $lists[] = $row;
+            }
+        }
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'delete') {
+            if (isset($_POST['list_id'])) {
+                $listId = $_POST['list_id'];  // Récupérer l'ID de la liste à supprimer
+        
+                // Préparer et exécuter la requête SQL pour supprimer la liste
+                $sql = "DELETE FROM liste WHERE idcolo = ?";
+                $stmt = $conn->prepare($sql);
+        
+                if ($stmt === false) {
+                    echo "Erreur lors de la préparation de la requête : " . $conn->error;
+                    exit();
+                }
+        
+                $stmt->bind_param("i", $listId);
+        
+                if ($stmt->execute()) {
+                    echo "Liste supprimée avec succès!";
+                } else {
+                    echo "Erreur lors de la suppression de la liste : " . $stmt->error;
+                }
+        
+                $stmt->close();
+            } else {
+                echo "ID de la liste non fourni.";
+            }
+        }
+        
+        // Récupérer les idcolo déjà utilisés dans la table 'liste'
+        $sql_used_colors = "SELECT idcolo FROM liste";
+        $result_used_colors = $conn->query($sql_used_colors);
+        
+        $used_colors = array();
+        if ($result_used_colors->num_rows > 0) {
+            while ($row = $result_used_colors->fetch_assoc()) {
+                $used_colors[] = $row['idcolo'];
+            }
+        }
+        
+        // Préparer la récupération des listes
+        $sql_liste = "SELECT liste.nom, colo.nom AS color_name, colo.id AS color_id FROM liste JOIN colo ON liste.idcolo = colo.id";
+        $result_liste = $conn->query($sql_liste);
+        
+        $lists = [];
+        if ($result_liste->num_rows > 0) {
+            while ($row = $result_liste->fetch_assoc()) {
+                $lists[] = $row;
+            }
+        }
+        
         // Fermer la connexion
         $conn->close();
+
         ?>
+
+         <!-- Modal pour gérer les listes -->
+         <div id="manageListModal" class="modal" style="display: none;">
+            <div class="modal-contents">
+                <span class="close">&times;</span>
+                <h2>Vos listes</h2>
+                <ul>
+                <?php foreach ($lists as $list): ?>
+    <li style="display: flex; align-items: center; margin-bottom: 20px;">
+        <span class="color-circle" style="background-color: <?php echo $list['color_name']; ?>; width: 35px; height: 35px; border-radius: 50%; margin-left: 30px;"></span>
+        <span style="margin-left: 10px; font-size: 24px; margin-bottom:10px"><?php echo $list['nom']; ?></span> <!-- Espace et taille de police ajoutés -->
+        <form method="POST" action="index.php" style="margin-left: auto;">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="list_id" value="<?php echo $list['color_id']; ?>"> <!-- ID correct de la liste -->
+            <button type="submit" style="border: none; background: none; cursor: pointer;">
+                <i class="fas fa-trash" style="margin-right: 40px;"></i>
+            </button>
+        </form>
+    </li>
+<?php endforeach; ?>
+
+                </ul>
+                <div class="exa">
+                <button class="new-list-btn">New List</button>
+                </div>
+                
+            </div>
+        </div>
 
         <!-- Modal pour ajouter une nouvelle liste -->
         <div id="addListModal" class="modal" style="display: none;">
@@ -125,56 +216,43 @@
 
                         $availableColors = false;
 
-            foreach ($colors as $id => $colorCode) {
-            if (!in_array($id, $used_colors)) {
-            $availableColors = true;
-                echo '
-                    <label>
-                    <input type="radio" name="color" value="' . $id . '" ' . ($id == 1 ? 'checked' : '') . '>
-                    <span class="color-circle" style="background-color: ' . $colorCode . ';"></span>
-                    </label>
-                    ';
-                     }
+                        foreach ($colors as $id => $colorCode) {
+                            if (!in_array($id, $used_colors)) {
+                                $availableColors = true;
+                                echo '
+                                    <label>
+                                    <input type="radio" name="color" value="' . $id . '" ' . ($id == 1 ? 'checked' : '') . '>
+                                    <span class="color-circle" style="background-color: ' . $colorCode . ';"></span>
+                                    </label>
+                                ';
                             }
+                        }
 
                         // Si aucune couleur n'est disponible
-                                if (!$availableColors) {
-                                 echo "Aucune couleur disponible.";
-                                            }
-
+                        if (!$availableColors) {
+                            echo "Aucune couleur disponible.";
+                        }
                         ?>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Modal pour gérer les listes -->
-        <div id="manageListModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Gérer les listes</h2>
-                <form id="manageListForm" method="POST" action="manage.php">
-                    <div class="inputs">
-                        <input type="text" name="newListName" placeholder="Renommer la liste" class="premiers" required>
-                        <input type="hidden" name="manage_list" value="1">
-                        <button class="deux">Update</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
+       
         <section class="formulaire">
             <div class="icons">
                 <a class="open-list-modal" href="#"><i class='bx bxs-circle'></i></a>
                 <a class="open-manage-modal" href="#"><i class="fas fa-cog"></i></a>
             </div>
-            <form action="index.php" method="POST">
-                <div class="input">
-                    <input type="text" id="tache" name="tache" class="premier" placeholder="Entrez une tâche pour la journée" required>
-                    <input type="hidden" name="add_task" value="1">
-                    <button class="deux">Add</button>
-                </div>
-            </form>
+           <form action="index.php" method="POST">
+          <div class="input">
+        <input type="text" id="tache" name="tache" class="premier" placeholder="Entrez une tâche pour la journée" required>
+        <input type="hidden" name="idliste" id="idliste" value=""> <!-- Champ caché pour l'ID de la liste sélectionnée -->
+        <input type="hidden" name="add_task" value="1">
+        <button class="deux">Add</button>
+          </div>
+</form>
+
         </section>
 
         <!-- JavaScript pour gérer les modals -->
@@ -200,10 +278,9 @@
                 });
             }
 
-            setupModal("addListModal", ".open-list-modal", ".close");
-            setupModal("manageListModal", ".open-manage-modal", ".close");
-            setupModal("manageListModal", ".open-manage-modal-nav", ".close");
+            setupModal('addListModal', '.new-list-btn', '.close');
+            setupModal('addListModal', '.open-list-modal', '.close');
+            setupModal('manageListModal', '.open-manage-modal', '.close');
         </script>
-
     </body>
 </html>
